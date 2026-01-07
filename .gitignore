@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Ignore large data
+*.zip
+*.tsv
+*.pkl
+*.joblib
+
+# ===== Project Output =====
+News/
