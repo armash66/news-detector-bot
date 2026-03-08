@@ -1,12 +1,55 @@
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Jupyter
 .ipynb_checkpoints/
 
-# Ignore large data
-*.zip
-*.tsv
+# Environment
+.env
+
+# Model Artifacts (large files)
+checkpoints/
 *.pkl
 *.joblib
+*.bin
+*.safetensors
+*.pt
+*.onnx
 
-# ===== Project Output =====
+# Data (large files)
+data/
+*.tsv
+*.zip
+*.tar.gz
+
+# Output
 News/
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cache
+cache/
+.cache/
