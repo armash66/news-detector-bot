@@ -1,412 +1,231 @@
-# VeritasAI - Misinformation Detection Platform
+# Veritas AI - Production News Intelligence Platform
 
-A production-grade, AI-powered fact-checking and misinformation detection system. Analyzes news articles and claims using transformer models, evidence retrieval, and multi-signal credibility scoring with explainable AI.
+Veritas AI is a comprehensive AI Software-as-a-Service (SaaS) platform designed for real-time misinformation detection, fact-checking, and news intelligence. The system continuously fetches online content, analyzes it using advanced multimodal transformer models, and provides automated, transparent credibility reporting metrics.
+
+## Table of Contents
+1. [System Architecture](#system-architecture)
+2. [Platform Components](#platform-components)
+3. [Project Structure](#project-structure)
+4. [Prerequisites and Dependencies](#prerequisites-and-dependencies)
+5. [Installation and Setup](#installation-and-setup)
+6. [Running the Application](#running-the-application)
+7. [API Reference Guide](#api-reference-guide)
+8. [Multimodal Analysis Capabilities](#multimodal-analysis-capabilities)
+9. [Discord Bot Integration](#discord-bot-integration)
+10. [Model Training and Fine-Tuning](#model-training-and-fine-tuning)
+11. [Extensibility](#extensibility)
+12. [License](#license)
 
 ---
 
 ## System Architecture
 
-```
-                                    VeritasAI Architecture
- +------------------+
- |   Client/User    |
- |  (Browser, CLI,  |
- |  Chrome Ext.)    |
- +--------+---------+
-          |
-          v
- +--------+---------+     +-------------------+
- |   FastAPI Server  |     |  Web Scraper      |
- |                   |<--->|  (newspaper3k +   |
- |  POST /analyze    |     |   BeautifulSoup)  |
- |  POST /verify     |     +-------------------+
- |  POST /analyze-url|
- +--------+---------+
-          |
-          v
- +--------+---------+
- |  Article Analyzer |  <-- Main Orchestrator
- |  (Pipeline)       |
- +--------+---------+
-          |
-     +----+----+----+----+----+
-     |         |         |         |         |
-     v         v         v         v         v
- +-------+ +-------+ +--------+ +-------+ +--------+
- |Transf. | |Claim  | |Evidence| |Click- | |Explain-|
- |Classi- | |Extrac-| |Retriev-| |bait   | |ability |
- |fier    | |tor    | |er      | |Detect.| |Engine  |
- |(BERT/  | |(spaCy)| |(News   | |       | |(SHAP/  |
- | RoBERTa| |       | | API)   | |       | | LIME)  |
- +---+----+ +---+---+ +---+----+ +---+---+ +---+----+
-     |         |         |         |         |
-     +----+----+----+----+----+----+----+----+
-          |
-          v
- +--------+---------+
- | Credibility       |
- | Scoring Engine    |
- | (0-100 composite) |
- +-------------------+
-          |
-          v
- +-------------------+
- |  Credibility      |
- |  Report           |
- |  - Score: 32%     |
- |  - Verdict        |
- |  - Reasons        |
- |  - Evidence       |
- |  - Explanations   |
- +-------------------+
-```
+The Veritas AI system utilizes a modern, decoupled architecture consisting of a high-performance Python backend, dynamic scraping workers, and a responsive React frontend.
+
+The flow operates as follows:
+- **Data Ingestion Layer**: Background worker nodes continuously scrape pre-configured RSS feeds and APIs for news content. This content is piped directly into the intelligence pipeline.
+- **Processing Layer**: Extracted text is fed into a fine-tuned HuggingFace Transformer model (e.g., RoBERTa, DeBERTa) to isolate potentially manipulative syntax and classify general credibility.
+- **Claim Extraction**: The article is decomposed into individual factual claims using Natural Language Processing segmentation routines.
+- **Evidence Retrieval**: Each claim is queried against live internet search providers (NewsAPI, SerpAPI) to verify factual accuracy against established credible sources.
+- **Multimodal Checking**: For articles with media, the image is passed alongside its caption or claim into a Vision-Language foundation model (CLIP). The vectors are compared using cosine similarity to ensure the image context perfectly aligns with the text context, automatically flagging deepfakes, recycled images, or out-of-context memes.
+- **Storage Layer**: Results are archived in a structured SQL database.
+- **Presentation Layer**: A dedicated web application exposes this intelligence via an interactable dashboard, allowing analysts to view live feeds, manually upload content for scans, and review platform-wide telemetry.
 
 ---
 
-## Features
+## Platform Components
 
-- **Transformer-Based Classification** - BERT, RoBERTa, DeBERTa for fake/real news detection
-- **Claim Extraction** - NLP-powered extraction of verifiable factual claims from articles
-- **Evidence Retrieval** - Cross-references claims against trusted sources via NewsAPI and SerpAPI
-- **Credibility Scoring** - Multi-signal 0-100 composite score with human-readable verdicts
-- **Clickbait Detection** - Weighted pattern analysis for sensational language
-- **Explainable AI** - SHAP, LIME, and attention visualization for model transparency
-- **Web Scraping** - Robust article extraction from any URL (newspaper3k + BeautifulSoup)
-- **RESTful API** - FastAPI backend with structured JSON responses
-- **Training Pipeline** - End-to-end training with mixed precision, early stopping, and evaluation
-- **Multi-Dataset Support** - LIAR, FakeNewsNet, PolitiFact, GossipCop, ISOT, custom datasets
+### 1. The Core Analyzer Matrix
+At the heart of Veritas AI is the Analyzer Pipeline. Instead of relying on a single heuristic, the application fuses multiple scoring mechanisms to output a final verdict:
+- NLP Classification Score
+- Cross-referencing against trusted domain whitelists/blacklists
+- Clickbait linguistic analysis
+- Linguistic integrity mapping (sentiment, polarity, and sensationalism checking)
+
+### 2. Attention-based Explainable AI (XAI)
+The application avoids "black box" decisions. When a prediction is issued, the backend runs an attention map generation sequence. It extracts the exact tokens or linguistic segments that heavily weighted the classifier's verdict and surfaces them to the dashboard, highlighting suspicious terms.
+
+### 3. Background News Fetcher
+Powered by APScheduler, a resilient background task loop polls global news aggregators and handles auto-processing. This allows Veritas AI to populate the dashboard autonomously without direct user intervention.
+
+### 4. Interactive SaaS Dashboard
+Built on top of React, Vite, and clean modular CSS, the frontend interface serves as an operations control center. Users can monitor the automated feed, analyze raw unstructured text, scan external web URLs, or test specific image-text pairs.
 
 ---
 
 ## Project Structure
 
-```
-news-detector-bot/
-|-- backend/
-|   |-- api/                         # FastAPI application
-|   |   |-- main.py                  # App factory + lifecycle
-|   |   |-- routes/
-|   |   |   |-- analyze.py           # POST /analyze, /analyze-url
-|   |   |   |-- verify.py            # POST /verify-claim
-|   |   |   |-- health.py            # GET /health
-|   |-- models/                      # ML models
-|   |   |-- classifier.py            # Transformer classifier
-|   |   |-- credibility.py           # Credibility scoring engine
-|   |   |-- clickbait.py             # Clickbait detector
-|   |-- services/                    # Business logic
-|   |   |-- analyzer.py              # Main orchestrator
-|   |   |-- claim_extractor.py       # Claim extraction pipeline
-|   |   |-- evidence_retriever.py    # Evidence search
-|   |   |-- explainability.py        # SHAP/LIME/attention
-|   |-- scrapers/                    # Web scraping
-|   |   |-- article_scraper.py       # URL -> structured article
-|   |-- training/                    # Model training
-|   |   |-- dataset_loader.py        # Multi-dataset loader
-|   |   |-- preprocessing.py         # Text cleaning
-|   |   |-- train.py                 # Training script
-|   |   |-- evaluate.py              # Evaluation script
-|   |-- utils/                       # Shared utilities
-|   |   |-- config.py                # Configuration management
-|   |   |-- logger.py                # Structured logging
-|   |-- tests/                       # Test suite
-|       |-- test_api.py
-|       |-- test_scraper.py
-|       |-- test_claim_extractor.py
-|       |-- test_models.py
-|-- .env.example                     # Environment template
-|-- .gitignore
-|-- requirements.txt
-|-- setup.py
-|-- README.md
+```text
+ai-news-detector/
+├── backend/
+│   ├── api/                 # Endpoint routing (REST endpoints for Dashboard and Bot)
+│   │   ├── routes/          # Isolated routers (analyze, verify, health, dashboard, multimodal)
+│   │   ├── dependencies.py  # Dependency injection for model analyzers
+│   │   └── main.py          # FastAPI application entrypoint and scheduler init
+│   ├── database.py          # SQLAlchemy context, engine, and ORM schema models
+│   ├── models/              # Pydantic data schemas representing responses internally
+│   ├── multimodal/          # Specialized CLIP Vision-Language AI integration scripts
+│   ├── scrapers/            # Web Scraping utilities and background News Fetcher polling jobs
+│   ├── services/            # Services for Credibility, XAI, Claims, and Evidence Retrieval
+│   └── training/            # Custom Dataset fine-tuning pipelines and evaluate loops
+├── frontend/                # React Vite Dashboard SPA root
+│   ├── src/                 # Primary interface React components and glassmorphic CSS
+│   ├── public/              # Static frontend assets
+│   ├── vite.config.js       # Vite configuration with strict proxying rules
+│   └── package.json         # Node.js dependencies
+├── tests/                   # Automated pytest suite for backend reliability verification
+├── bot.py                   # A production-ready Discord utility script for chat moderation
+├── requirements.txt         # Core Python dependencies lockfile
+├── TRAINING_GUIDE.md        # Specialized documentation for fine-tuning backend models
+└── README.md                # System documentation
 ```
 
 ---
 
-## Setup Instructions
+## Prerequisites and Dependencies
 
-### Prerequisites
+To successfully deploy the Veritas AI platform, the following environment prerequisites must be met:
 
-- Python 3.10+
-- pip
-- (Optional) CUDA-capable GPU for faster inference/training
+- Python 3.10 or higher (Python 3.14 is natively supported)
+- Node.js LTS (v18+) and npm
+- Valid HuggingFace Hub environment connectivity
+- Optional: Hardware acceleration (NVIDIA CUDA Toolkit) for production inferencing scale
 
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/armash66/news-detector-bot.git
-cd news-detector-bot
-```
-
-### 2. Create Virtual Environment
-
-```bash
-python -m venv venv
-
-# Windows
-venv\Scripts\activate
-
-# macOS/Linux
-source venv/bin/activate
-```
-
-### 3. Install Dependencies
-
-```bash
-# Core dependencies
-pip install -r requirements.txt
-
-# Download spaCy model
-python -m spacy download en_core_web_sm
-
-# (Optional) Install PyTorch with CUDA support
-# Visit https://pytorch.org/get-started/locally/ for your specific setup
-```
-
-### 4. Configure Environment
-
-```bash
-cp .env.example .env
-# Edit .env with your API keys
-```
-
-### 5. Start the API Server
-
-```bash
-uvicorn backend.api.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-The API will be available at `http://localhost:8000` with interactive docs at `/docs`.
+Required Python libraries include `fastapi`, `uvicorn`, `transformers`, `torch`, `Pillow`, `SQLAlchemy`, `apscheduler`, `BeautifulSoup4`, `pydantic`, `feedparser`, and `discord.py`.
 
 ---
 
-## API Usage
+## Installation and Setup
 
-### Analyze Article Text
+Follow these exact steps to clone, configure, and install the complete architecture.
 
-```bash
-curl -X POST http://localhost:8000/api/v1/analyze \
-  -H "Content-Type: application/json" \
-  -d '{
-    "text": "NASA announced today that alien life has been confirmed in Arizona desert. Scientists are shocked by the discovery.",
-    "explain": true,
-    "explanation_methods": ["attention"]
-  }'
-```
+1. Clone the repository and navigate into the primary directory:
+   ```bash
+   git clone https://github.com/armash66/ai-news-detector.git
+   cd ai-news-detector
+   ```
 
-**Response:**
-```json
-{
-  "classification": {
-    "label": "FAKE",
-    "confidence": 0.87,
-    "probabilities": {"REAL": 0.13, "FAKE": 0.87}
-  },
-  "claims": [
-    {
-      "text": "NASA announced today that alien life has been confirmed in Arizona desert.",
-      "type": "attribution",
-      "confidence": 0.8,
-      "entities": ["NASA", "Arizona"]
-    }
-  ],
-  "evidence": [...],
-  "clickbait": {
-    "score": 0.45,
-    "is_clickbait": true,
-    "flags": ["Shocking language"]
-  },
-  "credibility": {
-    "score": 28.5,
-    "verdict": "Likely Misinformation",
-    "reasons": [
-      "AI model flagged content as likely fabricated",
-      "No corroborating evidence found from reliable sources",
-      "Headline uses sensational or clickbait language"
-    ],
-    "component_scores": {
-      "model_prediction": 13.0,
-      "source_credibility": 50.0,
-      "evidence_support": 30.0,
-      "clickbait": 55.0,
-      "language_patterns": 68.0
-    }
-  },
-  "explanations": {
-    "attention": {
-      "summary": "Attention analysis identified 3 suspicious tokens...",
-      "top_suspicious_phrases": ["confirmed", "alien", "shocked"]
-    }
-  }
-}
-```
+2. Establish the Python environment and install the required modules. Using a virtual environment is strictly recommended.
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-### Analyze Article from URL
+3. Configure Environment Variables. Create a file named `.env` in the root directory. This is utilized by the backend to handle critical keys and configurations without hardcoding.
+   ```env
+   # .env example
+   NEWS_API_KEY=your_news_api_key_here
+   SERP_API_KEY=your_serp_api_key_here
+   DISCORD_TOKEN=your_discord_bot_token_here
+   DATABASE_URL=sqlite:///./veritas.db
+   ```
 
-```bash
-curl -X POST http://localhost:8000/api/v1/analyze-url \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://example.com/suspicious-article"}'
-```
+4. Install the Frontend dependencies.
+   ```bash
+   cd frontend
+   npm install
+   ```
 
-### Verify a Single Claim
-
-```bash
-curl -X POST http://localhost:8000/api/v1/verify-claim \
-  -H "Content-Type: application/json" \
-  -d '{"claim": "The earth is flat according to NASA scientists"}'
-```
+No manual database migrations are required initially on SQLite, as the application utilizes SQLAlchemy's metadata auto-generation upon the first boot context.
 
 ---
 
-## Model Training
+## Running the Application
 
-### Download a Dataset
+### 1. Booting the Backend Intelligence API
 
-The platform supports multiple datasets. Example with LIAR:
-
+Navigate to the project root and initiate the uvicorn web server.
 ```bash
-mkdir -p data/liar
-# Download from: https://www.cs.ucsb.edu/~william/data/liar_dataset.zip
-# Extract train.tsv, valid.tsv, test.tsv into data/liar/
+uvicorn backend.api.main:app --host 127.0.0.1 --port 8000 --reload
 ```
+Upon execution, four primary events will occur:
+- The base NLP models will initialize in memory.
+- The multimodal image models (if required) will prepare.
+- The SQL database will establish connections.
+- The APScheduler worker will commence the background feed polling.
 
-### Train a Model
+You can verify the API is online by navigating to `http://127.0.0.1:8000/docs`, which provides interactive Swagger UI testing interfaces.
 
+### 2. Booting the Frontend Dashboard
+
+Open an independent terminal window, navigate to the `frontend` folder, and initiate the Vite development server.
 ```bash
-python -m backend.training.train \
-  --dataset liar \
-  --model roberta-base \
-  --epochs 3 \
-  --batch-size 16 \
-  --lr 2e-5 \
-  --output-dir ./checkpoints
+cd frontend
+npm run dev
 ```
+Navigate your browser to `http://localhost:5173`. The application proxy is pre-configured to automatically tunnel all `/api` requests to the locally hosted Python instance securely.
 
-**Supported models:**
-| Model | Identifier | Parameters |
-|-------|-----------|------------|
-| BERT | `bert-base-uncased` | 110M |
-| RoBERTa | `roberta-base` | 125M |
-| DeBERTa v3 | `microsoft/deberta-v3-base` | 184M |
+---
 
-### Evaluate a Model
+## API Reference Guide
 
+The backend routes are cleanly segmented. The following represents the primary integration points for external applications.
+
+### Text Analysis
+`POST /api/v1/analyze`
+Generates a comprehensive credibility report from raw text input. Submits text to the transformer model, isolates claims, retrieves internet evidence, and compiles a final unified score.
+
+### URL Analysis
+`POST /api/v1/analyze-url`
+Performs identical operations as above, but natively scrapes the text content, authors, timestamps, and images directly from the provided article URL.
+
+### Multimodal Pipeline
+`POST /api/v1/analyze-multimodal`
+Requires two fields: `text` and `image_url`. The Vision-Language model embeds both features into a shared space and measures consistency. A low consistency implies the image lacks relationship to the claim, alerting to potential manipulation.
+
+### Dashboard Telemetry
+`GET /api/v1/dashboard/feed`
+Retrieves a paginated list of all independently scanned articles the background engine has intercepted, sorted chronologically.
+
+`GET /api/v1/dashboard/stats`
+Returns system footprint metrics, classifying all database entries into their respective credibility spectrums for administrative charting.
+
+---
+
+## Multimodal Analysis Capabilities
+
+Modern misinformation often relies on cheap manipulation techniques, such as attaching an unrelated, emotionally charged image to a falsified claim.
+
+The `backend/multimodal/analyzer.py` engine addresses this. The platform automatically downloads the target image and feeds it into OpenAI's CLIP architecture. The text embedding and vision embedding vectors undergo cosine similarity checks. If the resulting value drops below statistical thresholds, the application generates a "Manipulation Detected" or "Out of Context" warning.
+
+This allows analysts to counter "Fake Context Memes" efficiently without requiring manual reverse image searches.
+
+---
+
+## Discord Bot Integration
+
+For immediate community moderation or deployment within operational servers, a standalone Discord application is bundled within `bot.py`.
+
+The bot listens for the `!verify` command prefix followed by any string of text. It dispatches a request to local intelligence engine, awaits the credibility assessment, and formats the output into a rich, color-coded Discord Embed containing the AI's logic methodology and final severity score.
+
+To operate the bot, run:
 ```bash
-python -m backend.training.evaluate \
-  --checkpoint ./checkpoints/best_model \
-  --dataset liar \
-  --split test \
-  --output ./checkpoints/eval_results.json
+python bot.py
 ```
-
-### Use a Fine-Tuned Model
-
-Set the checkpoint path when starting the server:
-
-```bash
-# In .env
-MODEL_CHECKPOINT_DIR=./checkpoints/best_model
-```
-
-Or pass it directly when initializing:
-
-```python
-from backend.services.analyzer import ArticleAnalyzer
-
-analyzer = ArticleAnalyzer(checkpoint_path="./checkpoints/best_model")
-report = analyzer.analyze_text("Some suspicious article text...")
-print(report.credibility)
-```
+Ensure your `DISCORD_TOKEN` environment parameter is correctly asserted, and that the backend API is online.
 
 ---
 
-## Running Tests
+## Model Training and Fine-Tuning
 
-```bash
-# Run all tests
-pytest backend/tests/ -v
+While Veritas AI ships with support for highly capable pretrained weights, true enterprise accuracy demands domain-specific fine-tuning. A fully automated fine-tuning pipeline is incorporated.
 
-# Run specific test file
-pytest backend/tests/test_models.py -v
+By supplying a proprietary CSV matrix of confirmed positive and negative misinformation articles, analysts can rebuild the foundational classification engine using the `backend.training.train` module. The newly trained weights overwrite the legacy models smoothly.
 
-# Run with coverage
-pytest backend/tests/ --cov=backend --cov-report=html
-```
+For deeply detailed instructions regarding hyperparameter configurations, GPU offloading, and dataset schema requirements, please reference the dedicated `TRAINING_GUIDE.md` file located in the repository root.
 
 ---
 
-## Credibility Scoring Breakdown
+## Extensibility
 
-The credibility score (0-100) is a weighted composite of five signals:
+The platform architecture was specifically crafted to encourage expansion. The core engines are inherently decoupled.
 
-| Signal | Weight | Description |
-|--------|--------|-------------|
-| Model Prediction | 35% | Transformer classifier confidence |
-| Source Credibility | 20% | Domain reputation rating |
-| Evidence Support | 25% | Corroboration from trusted sources |
-| Clickbait Detection | 10% | Sensational language analysis |
-| Language Patterns | 10% | Manipulation indicator detection |
-
-**Verdicts:**
-| Score Range | Verdict |
-|-------------|---------|
-| 75-100 | Likely Credible |
-| 50-74 | Mixed Credibility |
-| 25-49 | Likely Misinformation |
-| 0-24 | High Risk Misinformation |
-
----
-
-## Supported Datasets
-
-| Dataset | Description | Labels | Download |
-|---------|-------------|--------|----------|
-| LIAR | Political statements | 6-class (mapped to binary) | [Link](https://www.cs.ucsb.edu/~william/data/liar_dataset.zip) |
-| FakeNewsNet/PolitiFact | Political fact-checks | Binary | [GitHub](https://github.com/KaiDMML/FakeNewsNet) |
-| FakeNewsNet/GossipCop | Celebrity news | Binary | [GitHub](https://github.com/KaiDMML/FakeNewsNet) |
-| ISOT | News articles | Binary | [Link](https://www.uvic.ca/ecs/ece/isot/datasets/) |
-| Custom | Your own data | Binary (CSV/JSON) | - |
-
----
-
-## Tech Stack
-
-| Component | Technology |
-|-----------|-----------|
-| ML Framework | PyTorch + HuggingFace Transformers |
-| NLP | spaCy, Tokenizers |
-| API | FastAPI + Uvicorn |
-| Explainability | SHAP, LIME |
-| Scraping | newspaper3k, BeautifulSoup |
-| Config | Pydantic Settings |
-| Testing | pytest |
-
----
-
-## Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `NEWS_API_KEY` | - | NewsAPI.org API key for evidence retrieval |
-| `SERP_API_KEY` | - | SerpAPI key for Google search |
-| `MODEL_NAME` | `roberta-base` | HuggingFace model identifier |
-| `MAX_SEQ_LENGTH` | `512` | Maximum token length |
-| `HOST` | `0.0.0.0` | Server host |
-| `PORT` | `8000` | Server port |
-| `LOG_LEVEL` | `INFO` | Logging verbosity |
-
----
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit changes: `git commit -m "Add your feature"`
-4. Push to branch: `git push origin feature/your-feature`
-5. Open a Pull Request
+Areas for optimal future development include:
+- Establishing a PostgreSQL migration context using Alembic for enterprise replication and state management.
+- Integrating caching layers like Redis to memorize XAI attention arrays for rapid subsequent serving and minimal processing latency.
+- Developing browser extensions to highlight suspicious syntax visually directly upon the client's Document Object Model (DOM).
 
 ---
 
 ## License
 
-MIT License. See [LICENSE](LICENSE) for details.
+Copyright (c) Armash Ansari. All Rights Reserved. This software is provided for the purpose of research, operational intelligence, and analytical data protection. Please reference the local `LICENSE` file for usage conditions and distribution terms related to open-source utilization and downstream modifications.
