@@ -1,5 +1,5 @@
 # Python
-__pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
 .venv
@@ -8,11 +8,18 @@ ENV/
 env/
 .env
 
+# Databases
+*.db
+*.sqlite3
+
 # Next.js
 truthlens-ui/node_modules/
 truthlens-ui/.next/
 truthlens-ui/out/
 truthlens-ui/build/
+
+# Legacy / Collisions
+frontend/
 
 # IDE
 .vscode/
