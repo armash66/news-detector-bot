@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import DeepfakeForensics from './DeepfakeForensics';
 import BotNetworks from './BotNetworks';
 import NarrativeStreams from './NarrativeStreams';
+import SourceAudit from './SourceAudit';
 
 type IntelIntel = {
   id: string;
@@ -14,7 +15,7 @@ type IntelIntel = {
   suspicion_score: number;
 };
 
-type TabType = 'heatmap' | 'forensics' | 'networks' | 'narratives';
+type TabType = 'heatmap' | 'forensics' | 'networks' | 'narratives' | 'sources';
 
 export default function DashboardClient() {
   const [intelFeed, setIntelFeed] = useState<IntelIntel[]>([]);
@@ -22,10 +23,16 @@ export default function DashboardClient() {
   const [activeTab, setActiveTab] = useState<TabType>('heatmap');
 
   useEffect(() => {
+    // Initial fetch for historical data
     const fetchIntel = async () => {
       try {
         const res = await fetch('http://localhost:8000/api/v1/feed/live');
-        if (!res.ok) throw new Error('Network response was not ok');
+        console.log("Fetch Status:", res.status);
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error("API Error Response:", errorText);
+          throw new Error(`Network response was not ok: ${res.status}`);
+        }
         const data = await res.json();
         setIntelFeed(data.data || []);
       } catch (error) {
@@ -36,8 +43,25 @@ export default function DashboardClient() {
     };
 
     fetchIntel();
-    const interval = setInterval(fetchIntel, 30000); // Poll every 30s
-    return () => clearInterval(interval);
+
+    // Establish WebSocket connection for real-time updates
+    const ws = new WebSocket('ws://localhost:8000/api/v1/stream/live');
+
+    ws.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        if (message.type === 'new_intelligence') {
+          setIntelFeed(prev => [message.data, ...prev].slice(0, 50)); // Keep top 50
+        }
+      } catch (err) {
+        console.error("WebSocket message error:", err);
+      }
+    };
+
+    ws.onopen = () => console.log("TruthLens WebSocket Connected");
+    ws.onclose = () => console.log("TruthLens WebSocket Disconnected");
+
+    return () => ws.close();
   }, []);
 
   return (
@@ -79,6 +103,12 @@ export default function DashboardClient() {
                 className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${activeTab === 'forensics' ? 'bg-slate-800 text-slate-200' : 'text-slate-400 hover:text-slate-200'}`}
               >
                 Deepfake Forensics
+              </button>
+              <button
+                onClick={() => setActiveTab('sources')}
+                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${activeTab === 'sources' ? 'bg-slate-800 text-slate-200' : 'text-slate-400 hover:text-slate-200'}`}
+              >
+                Source Audit
               </button>
             </div>
             <div className="flex items-center gap-2">
@@ -169,6 +199,8 @@ export default function DashboardClient() {
           <BotNetworks />
         ) : activeTab === 'narratives' ? (
           <NarrativeStreams />
+        ) : activeTab === 'sources' ? (
+          <SourceAudit />
         ) : null}
       </main>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import NarrativeTree from './NarrativeTree';
 
 type Narrative = {
     id: string;
@@ -16,6 +17,7 @@ type Narrative = {
 export default function NarrativeStreams() {
     const [narratives, setNarratives] = useState<Narrative[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedNarrative, setSelectedNarrative] = useState<{ id: string, topic: string } | null>(null);
 
     useEffect(() => {
         const fetchNarratives = async () => {
@@ -35,6 +37,16 @@ export default function NarrativeStreams() {
         const interval = setInterval(fetchNarratives, 45000);
         return () => clearInterval(interval);
     }, []);
+
+    if (selectedNarrative) {
+        return (
+            <NarrativeTree
+                narrativeId={selectedNarrative.id}
+                topic={selectedNarrative.topic}
+                onBack={() => setSelectedNarrative(null)}
+            />
+        );
+    }
 
     return (
         <div className="bg-slate-900 border border-slate-800 rounded-md p-6 shadow-sm min-h-[70vh]">
@@ -63,7 +75,7 @@ export default function NarrativeStreams() {
                                 <div className="flex-1">
                                     <div className="flex items-center gap-3 mb-2">
                                         <span className={`h-2 w-2 rounded-full ${narrative.verification_status.includes('Manipulated') ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]' :
-                                                narrative.verification_status.includes('Bot') ? 'bg-amber-500' : 'bg-emerald-500'
+                                            narrative.verification_status.includes('Bot') ? 'bg-amber-500' : 'bg-emerald-500'
                                             }`}></span>
                                         <h3 className="text-md font-medium text-slate-100 group-hover:text-indigo-300 transition-colors">{narrative.topic}</h3>
                                     </div>
@@ -90,8 +102,8 @@ export default function NarrativeStreams() {
                                     <div className="text-center">
                                         <p className="text-[10px] text-slate-500 uppercase mb-1">Status</p>
                                         <span className={`text-[10px] font-bold px-2 py-1 rounded border ${narrative.verification_status.includes('Manipulated') ? 'border-rose-900 text-rose-500 bg-rose-500/5' :
-                                                narrative.verification_status.includes('Bot') ? 'border-amber-900 text-amber-500 bg-amber-500/5' :
-                                                    'border-emerald-900 text-emerald-500 bg-emerald-500/5'
+                                            narrative.verification_status.includes('Bot') ? 'border-amber-900 text-amber-500 bg-amber-500/5' :
+                                                'border-emerald-900 text-emerald-500 bg-emerald-500/5'
                                             }`}>
                                             {narrative.verification_status.toUpperCase()}
                                         </span>
@@ -103,7 +115,10 @@ export default function NarrativeStreams() {
                                 <p className="text-xs text-slate-500">
                                     Dominant Sentiment: <span className="text-slate-300 font-medium">{narrative.dominant_sentiment}</span>
                                 </p>
-                                <button className="text-[10px] text-indigo-400 font-semibold uppercase tracking-widest hover:text-indigo-300 transition-colors">
+                                <button
+                                    onClick={() => setSelectedNarrative({ id: narrative.id, topic: narrative.topic })}
+                                    className="text-[10px] text-indigo-400 font-semibold uppercase tracking-widest hover:text-indigo-300 transition-colors"
+                                >
                                     View Full Tree →
                                 </button>
                             </div>
