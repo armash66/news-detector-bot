@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import DeepfakeForensics from './DeepfakeForensics';
 import BotNetworks from './BotNetworks';
+import NarrativeStreams from './NarrativeStreams';
 
 type IntelIntel = {
   id: string;
@@ -13,7 +14,7 @@ type IntelIntel = {
   suspicion_score: number;
 };
 
-type TabType = 'heatmap' | 'forensics' | 'networks';
+type TabType = 'heatmap' | 'forensics' | 'networks' | 'narratives';
 
 export default function DashboardClient() {
   const [intelFeed, setIntelFeed] = useState<IntelIntel[]>([]);
@@ -61,7 +62,12 @@ export default function DashboardClient() {
               >
                 Global Heatmap
               </button>
-              <span className="px-3 py-1 rounded-md text-sm font-medium text-slate-400 cursor-not-allowed transition-colors">Narrative Streams</span>
+              <button
+                onClick={() => setActiveTab('narratives')}
+                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${activeTab === 'narratives' ? 'bg-slate-800 text-slate-200' : 'text-slate-400 hover:text-slate-200'}`}
+              >
+                Narrative Streams
+              </button>
               <button
                 onClick={() => setActiveTab('networks')}
                 className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${activeTab === 'networks' ? 'bg-slate-800 text-slate-200' : 'text-slate-400 hover:text-slate-200'}`}
@@ -161,6 +167,8 @@ export default function DashboardClient() {
           <DeepfakeForensics />
         ) : activeTab === 'networks' ? (
           <BotNetworks />
+        ) : activeTab === 'narratives' ? (
+          <NarrativeStreams />
         ) : null}
       </main>
     </div>
