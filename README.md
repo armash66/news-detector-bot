@@ -1,54 +1,71 @@
-# TruthLens
+# TruthLens v3
 
-**Multimodal AI OSINT (Open Source Intelligence) Platform**
+**Real-Time News Detection and Intelligence Platform**
 
-TruthLens is a production-grade intelligence suite designed to monitor global information streams. It detects misinformation, coordinated propaganda campaigns, manipulated media (Deepfakes), and high-growth narrative clusters in real time.
+TruthLens is a centralized, event-centric backend system that continuously gathers news from multiple sources, detects emerging events, organizes them into structured entities, and enriches them with AI/NLP analysis.
 
-## 🚀 Key Features
+## Features
 
--   **Deepfake Forensics**: Multimodal VLM (Vision Language Model) analysis to detect manipulation and mismatched image/caption contexts.
--   **Bot Network Analysis**: Interaction topology visualization identifying coordinated amplifier networks and command nodes.
--   **Narrative Streams**: Semantic clustering of global news and social media streams into trackable topic clusters.
--   **Global Intel Feed**: Live-streaming OSINT threat dashboard.
+- **Event-Centric Architecture**: Articles are clustered into unified events instead of standalone narratives.
+- **Multimodal Ingestion**: Supports RSS feeds, NewsAPI, and direct web scraping (trafilatura).
+- **Redis Streams**: Scalable, decoupled streaming layer for ingestion and NLP processing.
+- **AI/NLP Pipeline**:
+  - Text cleaning and embedding generation (Sentence-BERT)
+  - Named Entity Recognition (spaCy) highlighting People, Organizations, Locations
+  - DistilBERT Sentiment and DistilBART Summarization
+- **Trust Engine**: Multi-factor article scoring with full explainability + cross-source contradiction detection.
+- **Search Engine**: Unified endpoint supporting Keyword, Semantic, and Hybrid search with trust-aware ranking.
 
-## 🛠️ Tech Stack
+## Infrastructure
 
--   **Backend**: FastAPI, Uvicorn, Pydantic, SQLAlchemy.
--   **AI Engine**: CLIP (Multimodal), ResNet (CNN Forensics), Tesseract (OCR), Sentence-Transformers.
--   **Frontend**: Next.js 16 (Turbopack), TailwindCSS 4, React-Force-Graph (WebGL).
+The platform uses a modern stack:
+- **FastAPI**: High-performance asynchronous API
+- **PostgreSQL / SQLAlchemy**: Relational event and article schemas
+- **Redis (Streams)**: Message brokering and event bus
+- **Docker**: Containerized services and reproducible environments
 
-## 🏁 Getting Started
+## Getting Started
 
 ### Prerequisites
+- Docker and Docker Compose
+- Python 3.11+ (for local development)
 
--   Python 3.14+
--   Node.js 20+
--   Tesseract OCR (for image text extraction)
+### Quickstart
 
-### Quick Start
+1. Clone the repository and configure your environment:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your specific API keys if needed
+   ```
 
-1.  **Clone the Repo**:
-    ```bash
-    git clone <repository-url>
-    cd truthlens-monolith
-    ```
+2. Start the platform using Docker Compose:
+   ```bash
+   docker-compose up --build -d
+   ```
 
-2.  **Start Backend**:
-    ```bash
-    pip install -r requirements.txt
-    uvicorn backend.api.main:app --reload --port 8000
-    ```
+   This will spin up:
+   - PostgreSQL (Database)
+   - Redis (Message broker / Streams)
+   - FastAPI Server (`http://localhost:8000`)
+   - Ingestion Worker (scheduler for RSS/APIs)
+   - NLP Worker (AI pipeline processor)
 
-3.  **Start Frontend**:
-    ```bash
-    cd truthlens-ui
-    npm install
-    npm run dev
-    ```
+3. Verify the system is running:
+   ```bash
+   curl http://localhost:8000/health
+   ```
 
-## 📊 Infrastructure
+4. View the interactive API documentation:
+   Visit `http://localhost:8000/docs` in your browser.
 
-The system is designed for horizontal scaling. Production deployments include:
--   **Neo4j**: For deep network relationship querying.
--   **PostgreSQL**: Structured metadata and verified intelligence storage.
--   **Redis**: Real-time message bus for the Live Intel feed.
+## Project Structure
+
+- `src/api/` - FastAPI routers (Events, Search, Trending, Trust, Alerts)
+- `src/events/` - Event detection, clustering, and merge/split engine
+- `src/ingestion/` - Data source connectors
+- `src/nlp/` - AI processors (Embeddings, NER, Sentiment)
+- `src/trust/` - Credibility scoring and contradiction detection
+- `src/streaming/` - Redis pub/sub and stream handlers
+- `src/workers/` - Background processes
+
+*Frontend UI acts as a separate consumer repository.*

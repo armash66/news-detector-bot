@@ -48,6 +48,9 @@ def create_app() -> FastAPI:
     from src.api.trending import router as trending_router
     from src.api.sources import router as sources_router
     from src.api.alerts import router as alerts_router
+    from src.api.analyze import router as analyze_router
+    from src.api.ws import router as ws_router
+    from src.api.monitoring import router as monitoring_router
 
     prefix = settings.API_V1_PREFIX
 
@@ -56,6 +59,9 @@ def create_app() -> FastAPI:
     app.include_router(trending_router, prefix=f"{prefix}/trending", tags=["Trending"])
     app.include_router(sources_router, prefix=f"{prefix}/sources", tags=["Sources"])
     app.include_router(alerts_router, prefix=f"{prefix}/alerts", tags=["Alerts"])
+    app.include_router(analyze_router, prefix=f"{prefix}/analyze", tags=["Analyze"])
+    app.include_router(ws_router, prefix=f"{prefix}/ws", tags=["WebSocket"])
+    app.include_router(monitoring_router, prefix="/admin", tags=["Monitoring"])
 
     # Initialize database tables
     @app.on_event("startup")
