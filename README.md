@@ -1,44 +1,166 @@
 # TruthLens
-**Real-Time News Detection and Intelligence Platform**
+**Production-Grade Event Detection & Global Intelligence Platform**
 
-## Overview
-TruthLens is a centralized, event-centric intelligence platform that continuously aggregates news from multiple global sources, automatically detects emerging events, and enriches raw data using a robust AI and NLP pipeline. 
+TruthLens is an advanced, decoupled intelligence backend that continuously aggregates unstructured news from global sources, algorithmically detects emerging real-world events, and structures them into tracked, highly enriched data objects using a multi-stage AI and NLP pipeline.
 
-Unlike traditional news aggregators that operate on a per-article basis, TruthLens structures discrete articles into evolving storylines. By dynamically clustering related coverage, tracking narratives across time, and computing cross-source trust scores, the system surfaces holistic operational intelligence. Fake news classification is integrated as an auxiliary sub-feature, while the primary focus remains on autonomous event detection, multi-source aggregation, and intelligence extraction. 
+While fake news detection is supported as an auxiliary subsystem, **TruthLens is primarily an autonomous intelligence extraction engine.** It replaces individual article-level reading with holistic event-level tracking, semantic relationship mapping, and credibility analysis.
 
-## Key Features
-* **Event-Centric Clustering**: Groups individual articles into discrete, continuously evolving events using Sentence-BERT embeddings and centroid-based assignment algorithms.
-* **Timeline Tracking**: Automatically maintains chronologies of emerging and ongoing events, intelligently merging or splitting event clusters as new data arrives.
-* **Multi-Factor Credibility Scoring**: Calculates trust mathematically by combining source reliability indices, linguistic analysis, and cross-source contradiction detection.
-* **Semantic Search Engine**: Unified search layer supporting exact keyword matching, dense vector semantic similarity, and trust-aware hybrid ranking techniques.
-* **Multi-Source Ingestion Engine**: Aggregates from highly distributed sources utilizing asynchronous API connectors (NewsAPI, GDELT), robust RSS parsers, and direct HTML extraction fallbacks.
-* **Extensible NLP Pipeline**: Executes sequential text cleaning, Named Entity Recognition (NER), DistilBERT sentiment analysis, and DistilBART abstractive summarization.
+---
 
-## How It Works (High-Level)
-1. **Ingestion**: Schedulers asynchronously pull articles from multiple publishers, deduplicating via content hashes and uniform resource locators (URLs).
-2. **Streaming**: Raw articles are published to distributed message queues for decoupled, fault-tolerant processing.
-3. **Processing**: Background workers consume messages, executing a 7-stage NLP pipeline to clean text, extract entities, compute semantic embeddings, and assess sentiment.
-4. **Event Detection**: The processed representations are compared against existing event centroids. Articles are either assigned to active events or used to instantiate new emerging events.
-5. **Storage & Access**: Structured intelligence is persisted to a relational database and indexed for exposure via a high-performance REST and WebSocket API.
+## 🏗️ System Architecture
 
-## Architecture
-TruthLens is fundamentally designed as a decoupled, microservice-ready backend.
-* **Ingestion Layer**: Independent polling agents and scrapers engineered for high throughput and rapid failure recovery.
-* **Message Broker**: Redis Streams handles pub/sub semantics, acting as the durable buffer between ingestion and computation.
-* **Intelligence Workers**: Scalable Python processes dedicated entirely to resource-heavy NLP inference and clustering permutations.
-* **Event Engine**: The core algorithmic module responsible for clustering similarity matching, silhouette score profiling, and data lifecycle management.
-* **API Layer**: An asynchronous FastAPI wrapper providing standardized RESTful routes and real-time WebSocket feeds for external consumption.
+The overarching system is designed as a scalable, event-driven microservices architecture relying on asynchronous queues and dedicated worker processes.
 
-## Data Flow
-1. Raw articles and metadata enter the system via the `IngestionScheduler`.
-2. Extracted payloads are serialized into Redis topic streams (`raw_articles`).
-3. The `NLPWorker` pulls batches from streams, executing embedding generation and entity mapping.
-4. Processed articles are evaluated by the `EventDetector`. Similarity matrices determine cluster assignment.
-5. The `TrustEngine` recalculates the event's overall credibility upon insertion to detect emergent contradictions.
-6. The `EventMerger` daemon periodically evaluates event centroids to dynamically merge duplicate clusters or split diverging narratives.
-7. Frontend clients retrieve serialized events via the API layer or subscribe to the `/ws/live` endpoint.
+```mermaid
+graph TD
+    %% Define Styles
+    classDef core fill:#2d3436,stroke:#74b9ff,stroke-width:2px,color:#fff;
+    classDef db fill:#0984e3,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef queue fill:#d63031,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef worker fill:#00b894,stroke:#fff,stroke-width:2px,color:#fff;
+    classDef external fill:#b2bec3,stroke:#fff,stroke-width:2px,color:#2d3436;
 
-## Example Event Output
+    %% Nodes
+    A[Global Data Sources]:::external
+    B[Ingestion Schedulers]:::worker
+    C[(Redis Streams)]:::queue
+    D[NLP & AI Workers]:::worker
+    E[Event Detection Engine]:::core
+    F[Trust & Credibility Engine]:::core
+    G[(PostgreSQL)]:::db
+    H[FastAPI Gateway]:::core
+    I[Client Applications]:::external
+
+    %% Flow
+    A -- RSS, NewsAPI, Scraper --> B
+    B -- Raw JSON Payloads --> C
+    C -- Consume Batches --> D
+    D -- Clean, Embed, NER, Analyze --> E
+    E -- Cluster Assignment --> F
+    F -- Source Scoring & Recalculation --> G
+    H -- SQL Queries & Semantic Search --> G
+    I -- REST / WebSocket Streams --> H
+    
+    %% Subgraphs for visual grouping
+    subgraph Ingestion Layer
+    B
+    end
+    
+    subgraph Intelligence Pipeline
+    D
+    E
+    F
+    end
+```
+
+---
+
+## ⚡ Core Capabilities
+
+### 1. Autonomous Event Clustering
+Instead of serving raw articles, TruthLens computes high-dimensional **Sentence-BERT** embeddings for incoming texts and projects them into vector space. Articles clustering near existing centroids are assigned to ongoing events. Density anomalies trigger the creation of entirely new events.
+
+### 2. Multi-Tier Trust Engine
+TruthLens fundamentally doubts its ingestion sources. The mathematical trust score for an event leverages:
+* **Historical Source Reliability**: Maintained credibility rankings.
+* **Linguistic Confidence**: DistilBERT-based extraction of subjective bias and sentiment.
+* **Cross-Source Contradiction**: Identifies conflicting claims across competing publishers covering the same event.
+
+### 3. Asynchronous Scalability
+Built on **Redis Streams**, the gap between high-velocity ingestion and slow NLP inference is completely decoupled. The platform can scale its Python worker instances horizontally based on stream backlog length entirely independent of the ingestion layers.
+
+---
+
+## 🛤️ Data Processing Pipeline
+
+When raw strings enter the platform, they undergo a rigorous 7-stage extraction process before being indexed.
+
+```mermaid
+sequenceDiagram
+    participant S as Scraper
+    participant P as Preprocessor
+    participant E as Embedder
+    participant N as NER Extractor
+    participant A as NLP Analyzer
+    participant DB as PostgreSQL
+
+    S->>P: Raw HTML/Feed Data
+    activate P
+    P-->>P: Remove boilerplates, clean HTML
+    P->>E: Clean String
+    deactivate P
+    activate E
+    E-->>E: Convert string to 384-d Tensor (SBERT)
+    E->>N: String + SBERT Vector
+    deactivate E
+    activate N
+    N-->>N: Extract PERSON, ORG, GPE (spaCy)
+    N->>A: Entities Extracted
+    deactivate N
+    activate A
+    A-->>A: DistilBART Summarization
+    A-->>A: DistilBERT Sentiment
+    A->>DB: Persist ProcessedArticle Object
+    deactivate A
+```
+
+## 🧩 Event Lifecycle & Database Schema
+
+TruthLens normalizes data heavily around the `Event` object, linking `Source`, `ProcessedArticle`, and `TimelineEntry` objects across junction tables.
+
+```mermaid
+erDiagram
+    EVENT {
+        uuid id PK
+        string title
+        string summary
+        float trust_score
+        float significance_score
+        vector centroid_embedding
+        string status
+    }
+    
+    PROCESSED_ARTICLE {
+        uuid id PK
+        uuid source_id FK
+        text clean_text
+        text summary
+        float sentiment_score
+        float credibility_score
+    }
+    
+    SOURCE {
+        uuid id PK
+        string domain
+        float reliability_score
+        boolean is_verified
+    }
+    
+    TIMELINE_ENTRY {
+        uuid id PK
+        uuid event_id FK
+        datetime timestamp
+        string description
+    }
+
+    EVENT ||--o{ PROCESSED_ARTICLE : "contains"
+    SOURCE ||--o{ PROCESSED_ARTICLE : "publishes"
+    EVENT ||--o{ TIMELINE_ENTRY : "evolves through"
+```
+
+## 🔍 The Event Merging Algorithm
+
+Real-world narratives merge and split dynamically. The `EventMerger` daemon continuously runs K-Means and Silhouette assessments on active clusters:
+
+1. **Merge Detection**: If the cosine similarity of two distinct event centroids exceeds `0.85` for multiple ingestion cycles, the clusters are automatically merged, combining their timelines.
+2. **Split Detection**: If the silhouette score of an existing event drops significantly (indicating polar divergence in coverage), the clustering algorithm forks the event into two distinct narrative streams.
+
+---
+
+## JSON Object Interface
+
+Frontend clients and API consumers receive deeply enriched intelligence payloads, rather than raw news scraped text.
+
 ```json
 {
   "id": "evt-7k29xP1",
@@ -46,62 +168,100 @@ TruthLens is fundamentally designed as a decoupled, microservice-ready backend.
   "summary": "Multiple financial authorities confirm unexpected changes to baseline interest rates amidst fluctuating inflation indexes.",
   "category": "ECONOMY",
   "status": "ONGOING",
-  "article_count": 14,
-  "source_count": 6,
-  "trust_score": 0.89,
-  "significance_score": 92.4,
-  "centroid_embedding": [0.012, -0.045, 0.881, "..."],
+  "metrics": {
+    "article_count": 14,
+    "source_count": 6,
+    "current_velocity": 4.2
+  },
+  "trust": {
+    "score": 0.89,
+    "explanation": "High credibility derived from 6 independent sources. No critical factual contradictions detected.",
+    "bias_distribution": 0.12
+  },
+  "nlp_analysis": {
+    "significance_score": 92.4,
+    "sentiment": -0.4,
+    "entities": [
+      {"text": "Central Bank", "label": "ORG", "mentions": 12},
+      {"text": "Jerome Powell", "label": "PERSON", "mentions": 8}
+    ]
+  },
   "timeline": [
     {"timestamp": "2024-03-24T08:00:00Z", "description": "Initial press release from regulatory board."},
     {"timestamp": "2024-03-24T09:15:00Z", "description": "Market reaction and secondary coverage."}
-  ],
-  "entities": [
-    {"text": "Central Bank", "label": "ORG", "mentions": 12},
-    {"text": "Jerome Powell", "label": "PERSON", "mentions": 8}
   ]
 }
 ```
 
-## Tech Stack
-* **Backend Framework**: FastAPI, Pydantic
-* **AI & NLP Pipeline**: spaCy, Sentence-Transformers (SBERT), HuggingFace Transformers (DistilBERT, DistilBART)
-* **Database & ORM**: PostgreSQL, SQLAlchemy, Alembic
-* **Messaging & Caching**: Redis (Streams)
-* **Infrastructure**: Docker, Docker Compose
+---
 
-## Getting Started
+## 🛠️ Technology Stack
+
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| **Core Framework** | `FastAPI`, `Pydantic` | High-throughput async REST endpoints. |
+| **Relational Data** | `PostgreSQL`, `SQLAlchemy` | Acid-compliant operational storage and JSONB. |
+| **Pipeline NLP** | `spaCy`, `Transformers` | Zero-shot classification, summarization, extraction. |
+| **Vector Engine** | `Sentence-BERT` | Dense semantic clustering matrices. |
+| **Message Broker** | `Redis Streams` | Persistent pub/sub queuing for worker distribution. |
+| **Infrastructure** | `Docker`, `Docker Compose` | Immutable, containerized execution environments. |
+
+---
+
+## 🚀 Getting Started
+
+Deploying the local development stack requires no manual dependency management, relying purely on the included operational docker configuration.
 
 ### Prerequisites
-* Docker
-* Docker Compose
-* Python 3.11+ (Local execution fallback only)
+* Docker engine (v24+)
+* Docker Compose plugin
 
-### Setup
-1. Clone the repository and configure the environment:
+### Initialization Sequence
+
+1. **Configure Environment**  
+   Clone the repository and secure local environment keys.
    ```bash
+   git clone https://github.com/your-org/truthlens.git
+   cd truthlens
    cp .env.example .env
    ```
-2. Initialize and start the containerized infrastructure:
+
+2. **Boot the Platform**  
+   Compile the python environments and stand up the external volumes in detached mode.
    ```bash
    docker-compose up --build -d
    ```
-3. The platform components are immediately accessible:
-   * REST API & Documentation: `http://localhost:8000/docs`
-   * Health Check: `curl http://localhost:8000/health`
 
-## UI Mocks
-*(Note: TruthLens acts as the intelligence core. Client implementations handle visualization).*
-* **Event Feed**: A chronologically sorted, rank-adjusted feed of active events natively featuring trust score badges and structural volume sparklines.
-* **Detail Canvas**: Expanded dashboards displaying event emergence timelines, multi-source contradiction matrices, and raw article references.
-* **Analytic Modules**: Source bias distributions, credibility tracking, and trending entity maps. 
+   The hypervisor will instantiate:
+   * `db` - The underlying Postgres data warehouse.
+   * `redis` - The high-IO stream broker.
+   * `api` - Edge gateway bound to `localhost:8000`.
+   * `ingestion_worker` - The external polling agent.
+   * `nlp_worker_1` - The inference process executing the pipeline.
 
-## Future Improvements
-* **Knowledge Graph Extraction**: Neo4j integration to natively map entity-to-entity relations across isolated temporal events.
-* **Early Signal Detection**: Stochastic modeling to identify significant narratives while article volume remains beneath standard thresholds.
-* **Targeted Delivery Feeds**: User-specific dimensionality filtering for customized intelligence pipelines.
+3. **Verify Edge Gateway**  
+   Confirm the core is accepting connections and compiling schemas.
+   ```bash
+   curl http://localhost:8000/health
+   # Expected {"status": "operational", "service": "truthlens"}
+   ```
 
-## Contributing
-Contributions are evaluated through strict pull request reviews. Ensure all test suites pass, conform to formatting guidelines, and include adequate architectural documentation before submission.
+4. **Access the Documentation**  
+   Interactive API explorers are automatically mapped:
+   * OpenAPI Swagger: [http://localhost:8000/docs](http://localhost:8000/docs)
+   * Redoc Standard: [http://localhost:8000/redoc](http://localhost:8000/redoc)
 
-## License
-Distributed under the MIT License.
+---
+
+## 🔮 Future Expansion Vectors
+
+* **Knowledge Graph Ingestion**: Export entity interactions natively into Neo4j objects to query complex relations extending temporally beyond singular events.
+* **Early Signal Degradation**: Execute stochastic modeling across untrusted social feeds to catch micro-narratives before they reach major organizational coverage thresholds.
+* **Vector Storage Optimization**: Migrate internal memory SBERT logic into native pgvector or Milvus depending on sustained event load density.
+* **Automated Kubernetes Operators**: Helm charts mapping the NLP workers directly to horizontal pod autoscaling metric server thresholds.
+
+---
+
+## 🛡️ License
+
+TruthLens source is provided as-is under the standard MIT software distribution license.
