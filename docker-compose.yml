@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: truthlens
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: truthlens
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U truthlens"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  api:
+    build: .
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/app
+      - /app/truthlens-ui
+      - /app/.venv
+      - /app/.git
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://truthlens:password@db:5432/truthlens
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  ingestion_worker:
+    build: .
+    command: python -m workers.ingestion_worker
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=postgresql://truthlens:password@db:5432/truthlens
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+
+  nlp_worker:
+    build: .
+    command: python -m workers.nlp_worker
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=postgresql://truthlens:password@db:5432/truthlens
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+      - api
+
+volumes:
+  pgdata:
