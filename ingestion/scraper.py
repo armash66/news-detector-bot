@@ -18,7 +18,7 @@ try:
 except ImportError:
     TRAFILATURA_AVAILABLE = False
 
-from src.ingestion.base import BaseConnector, RawArticleInput
+from ingestion.base import BaseConnector, RawArticleInput
 
 logger = logging.getLogger("truthlens.ingestion.scraper")
 

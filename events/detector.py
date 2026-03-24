@@ -6,12 +6,12 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
-from src.models.event import Event, EventArticle
-from src.models.article import ProcessedArticle
-from src.models.timeline import TimelineEntry
-from src.nlp.embeddings import EmbeddingGenerator
-from src.config.settings import settings
-from src.utils.time_utils import is_within_window
+from models.event import Event, EventArticle
+from models.article import ProcessedArticle
+from models.timeline import TimelineEntry
+from nlp.embeddings import EmbeddingGenerator
+from config.settings import settings
+from utils.time_utils import is_within_window
 
 logger = logging.getLogger("truthlens.events.detector")
 

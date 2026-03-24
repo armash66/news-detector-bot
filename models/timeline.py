@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import Column, String, Text, Float, DateTime, ForeignKey
-from src.models.base import Base
+from models.base import Base
 
 
 class TimelineEntry(Base):

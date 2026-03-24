@@ -5,12 +5,12 @@ import asyncio
 from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
-from src.models.database import SessionLocal
-from src.models.article import RawArticle, ProcessedArticle
-from src.models.source import Source
-from src.nlp.pipeline import NLPPipeline
-from src.events.detector import EventDetector
-from src.trust.engine import ArticleScorer, SourceScorer
+from models.database import SessionLocal
+from models.article import RawArticle, ProcessedArticle
+from models.source import Source
+from nlp.pipeline import NLPPipeline
+from events.detector import EventDetector
+from trust.engine import ArticleScorer, SourceScorer
 
 logger = logging.getLogger("truthlens.workers.nlp")
 

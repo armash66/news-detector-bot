@@ -3,7 +3,7 @@
 import logging
 from typing import List, Dict, Any, Optional
 
-from src.config.settings import settings
+from config.settings import settings
 
 logger = logging.getLogger("truthlens.nlp.ner")
 

@@ -6,10 +6,10 @@ from dataclasses import dataclass
 
 from sqlalchemy.orm import Session
 
-from src.models.source import Source
-from src.models.article import ProcessedArticle
-from src.models.event import Event, EventArticle
-from src.config.settings import settings
+from models.source import Source
+from models.article import ProcessedArticle
+from models.event import Event, EventArticle
+from config.settings import settings
 
 logger = logging.getLogger("truthlens.trust")
 

@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import Column, String, Float, Boolean, DateTime, Text, JSON
-from src.models.base import Base
+from models.base import Base
 
 
 class Source(Base):

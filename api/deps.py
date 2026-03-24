@@ -2,7 +2,7 @@
 
 from fastapi import Depends
 from sqlalchemy.orm import Session
-from src.models.database import get_db
+from models.database import get_db
 
 
 def get_database() -> Session:

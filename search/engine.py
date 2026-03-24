@@ -6,10 +6,10 @@ from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
-from src.models.event import Event
-from src.models.article import ProcessedArticle
-from src.nlp.embeddings import EmbeddingGenerator
-from src.config.settings import settings
+from models.event import Event
+from models.article import ProcessedArticle
+from nlp.embeddings import EmbeddingGenerator
+from config.settings import settings
 
 logger = logging.getLogger("truthlens.search")
 

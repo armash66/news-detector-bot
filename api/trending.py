@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone, timedelta
 
-from src.models.database import get_db
-from src.models.event import Event
-from src.schemas.schemas import EventResponse
+from models.database import get_db
+from models.event import Event
+from schemas.schemas import EventResponse
 
 router = APIRouter()
 

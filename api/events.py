@@ -4,13 +4,13 @@ from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from typing import Optional
 
-from src.models.database import get_db
-from src.models.event import Event, EventArticle
-from src.models.article import ProcessedArticle
-from src.models.timeline import TimelineEntry
-from src.models.claim import Claim
-from src.schemas.schemas import EventResponse, EventListResponse, ArticleResponse, TimelineEntryResponse, ClaimResponse
-from src.trust.engine import ArticleScorer, ContradictionDetector
+from models.database import get_db
+from models.event import Event, EventArticle
+from models.article import ProcessedArticle
+from models.timeline import TimelineEntry
+from models.claim import Claim
+from schemas.schemas import EventResponse, EventListResponse, ArticleResponse, TimelineEntryResponse, ClaimResponse
+from trust.engine import ArticleScorer, ContradictionDetector
 
 router = APIRouter()
 

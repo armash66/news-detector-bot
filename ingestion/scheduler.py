@@ -6,13 +6,13 @@ from datetime import datetime, timezone
 from typing import List
 
 from sqlalchemy.orm import Session
-from src.models.database import SessionLocal
-from src.models.source import Source
-from src.models.article import RawArticle
-from src.ingestion.base import BaseConnector, RawArticleInput
-from src.ingestion.rss import RSSConnector
-from src.utils.hashing import compute_content_hash
-from src.config.settings import settings
+from models.database import SessionLocal
+from models.source import Source
+from models.article import RawArticle
+from ingestion.base import BaseConnector, RawArticleInput
+from ingestion.rss import RSSConnector
+from utils.hashing import compute_content_hash
+from config.settings import settings
 
 logger = logging.getLogger("truthlens.ingestion.scheduler")
 

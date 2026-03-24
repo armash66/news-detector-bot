@@ -3,7 +3,7 @@
 import asyncio
 import logging
 
-from src.ingestion.scheduler import IngestionScheduler
+from ingestion.scheduler import IngestionScheduler
 
 logger = logging.getLogger("truthlens.workers.ingestion")
 

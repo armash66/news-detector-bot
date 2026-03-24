@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import Optional
 
-from src.models.database import get_db
-from src.search.engine import SearchEngine
-from src.schemas.schemas import EventResponse, SearchResponse
+from models.database import get_db
+from search.engine import SearchEngine
+from schemas.schemas import EventResponse, SearchResponse
 
 router = APIRouter()
 search_engine = SearchEngine()

@@ -4,7 +4,7 @@ import logging
 from typing import List, Optional
 import numpy as np
 
-from src.config.settings import settings
+from config.settings import settings
 
 logger = logging.getLogger("truthlens.nlp.embeddings")
 

@@ -6,7 +6,7 @@ from typing import Dict, Any, Optional
 
 import redis
 
-from src.config.settings import settings
+from config.settings import settings
 
 logger = logging.getLogger("truthlens.streaming.producer")
 

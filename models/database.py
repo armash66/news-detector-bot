@@ -8,7 +8,7 @@ Provides both sync and async session factories.
 import logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
-from src.config.settings import settings
+from config.settings import settings
 
 logger = logging.getLogger("truthlens.db")
 

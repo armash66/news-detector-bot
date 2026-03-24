@@ -4,11 +4,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import uuid
 
-from src.models.database import get_db
-from src.schemas.schemas import AnalyzeRequest, AnalyzeResponse
-from src.nlp.pipeline import NLPPipeline
-from src.trust.engine import ArticleScorer
-from src.models.article import ProcessedArticle
+from models.database import get_db
+from schemas.schemas import AnalyzeRequest, AnalyzeResponse
+from nlp.pipeline import NLPPipeline
+from trust.engine import ArticleScorer
+from models.article import ProcessedArticle
 
 router = APIRouter()
 nlp_pipeline = NLPPipeline()
@@ -46,7 +46,7 @@ def analyze_content(
     )
 
     # Score article (without a specific source)
-    from src.models.source import Source
+    from models.source import Source
     unknown_source = Source(name="Unknown", domain="unknown.com", reliability_score=0.5)
     
     trust_explanation = article_scorer.score_article(

@@ -4,13 +4,13 @@ import logging
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional
 
-from src.nlp.preprocessor import TextPreprocessor, CleanedText
-from src.nlp.embeddings import EmbeddingGenerator
-from src.nlp.ner import NERExtractor
-from src.nlp.sentiment import SentimentAnalyzer
-from src.nlp.summarizer import Summarizer
-from src.nlp.geo_extractor import GeoExtractor
-from src.nlp.fake_news import FakeNewsClassifier
+from nlp.preprocessor import TextPreprocessor, CleanedText
+from nlp.embeddings import EmbeddingGenerator
+from nlp.ner import NERExtractor
+from nlp.sentiment import SentimentAnalyzer
+from nlp.summarizer import Summarizer
+from nlp.geo_extractor import GeoExtractor
+from nlp.fake_news import FakeNewsClassifier
 
 logger = logging.getLogger("truthlens.nlp.pipeline")
 

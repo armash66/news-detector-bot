@@ -3,9 +3,9 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from src.models.database import get_db
-from src.models.alert import Alert
-from src.schemas.schemas import AlertResponse
+from models.database import get_db
+from models.alert import Alert
+from schemas.schemas import AlertResponse
 
 router = APIRouter()
 

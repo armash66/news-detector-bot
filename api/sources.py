@@ -3,10 +3,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from src.models.database import get_db
-from src.models.source import Source
-from src.schemas.schemas import SourceResponse
-from src.trust.engine import SourceScorer
+from models.database import get_db
+from models.source import Source
+from schemas.schemas import SourceResponse
+from trust.engine import SourceScorer
 
 router = APIRouter()
 source_scorer = SourceScorer()

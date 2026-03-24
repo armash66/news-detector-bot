@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import Column, String, Text, Boolean, DateTime, ForeignKey, JSON
-from src.models.base import Base
+from models.base import Base
 
 
 class Alert(Base):

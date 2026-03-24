@@ -5,7 +5,7 @@ import logging
 from datetime import datetime, timezone
 from typing import List, Optional
 
-from src.ingestion.base import BaseConnector, RawArticleInput
+from ingestion.base import BaseConnector, RawArticleInput
 
 logger = logging.getLogger("truthlens.ingestion.newsapi")
 

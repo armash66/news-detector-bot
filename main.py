@@ -2,14 +2,14 @@
 TruthLens v3 — FastAPI Application Factory
 
 Entry point for the API server. Registers all routers and middleware.
-Run: uvicorn src.main:app --reload --port 8000
+Run: uvicorn main:app --reload --port 8000
 """
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
 
-from src.config.settings import settings
+from config.settings import settings
 
 logging.basicConfig(
     level=logging.INFO,
@@ -43,14 +43,14 @@ def create_app() -> FastAPI:
         return {"status": "operational", "service": settings.PROJECT_NAME, "version": settings.VERSION}
 
     # Register API routers
-    from src.api.events import router as events_router
-    from src.api.search import router as search_router
-    from src.api.trending import router as trending_router
-    from src.api.sources import router as sources_router
-    from src.api.alerts import router as alerts_router
-    from src.api.analyze import router as analyze_router
-    from src.api.ws import router as ws_router
-    from src.api.monitoring import router as monitoring_router
+    from api.events import router as events_router
+    from api.search import router as search_router
+    from api.trending import router as trending_router
+    from api.sources import router as sources_router
+    from api.alerts import router as alerts_router
+    from api.analyze import router as analyze_router
+    from api.ws import router as ws_router
+    from api.monitoring import router as monitoring_router
 
     prefix = settings.API_V1_PREFIX
 
@@ -66,10 +66,10 @@ def create_app() -> FastAPI:
     # Initialize database tables
     @app.on_event("startup")
     def startup():
-        from src.models.base import Base
-        from src.models.database import engine
+        from models.base import Base
+        from models.database import engine
         # Import all models so they register with Base
-        from src.models import (
+        from models import (
             Source, RawArticle, ProcessedArticle, Event, EventArticle,
             Claim, Entity, EntityMention, TimelineEntry, Alert,
         )
@@ -83,4 +83,4 @@ app = create_app()
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("src.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

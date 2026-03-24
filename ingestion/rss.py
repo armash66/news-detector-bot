@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import feedparser
 import logging
 
-from src.ingestion.base import BaseConnector, RawArticleInput
+from ingestion.base import BaseConnector, RawArticleInput
 
 logger = logging.getLogger("truthlens.ingestion.rss")
 
