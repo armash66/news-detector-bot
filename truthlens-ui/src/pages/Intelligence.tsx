@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Map, Calendar, AlertTriangle } from 'lucide-react';
+import { Search, AlertTriangle } from 'lucide-react';
 
 export const Intelligence: React.FC = () => {
   return (

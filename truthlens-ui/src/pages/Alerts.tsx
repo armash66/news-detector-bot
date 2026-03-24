@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, SlidersHorizontal, ArrowRight, Activity } from 'lucide-react';
+import { Settings, SlidersHorizontal, Activity } from 'lucide-react';
 
 export const Alerts: React.FC = () => {
   return (

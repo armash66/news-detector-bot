@@ -1,5 +1,4 @@
 import React from 'react';
-import { ArrowRight, Download } from 'lucide-react';
 
 export const Briefing: React.FC = () => {
   return (
