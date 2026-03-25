@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Search, AlertTriangle } from 'lucide-react';
-import { api, EventResponse } from '../api';
+import { api, type EventResponse } from '../api';
 import { formatDistanceToNow } from 'date-fns';
 import { Link } from 'react-router-dom';
 

@@ -29,7 +29,8 @@ graph TD
     F[Trust & Credibility Engine]:::core
     G[(PostgreSQL)]:::db
     H[FastAPI Gateway]:::core
-    I[Client Applications]:::external
+    I[React Frontend (truthlens-ui)]:::external
+    J[End Users]:::external
 
     %% Flow
     A -- RSS, NewsAPI, Scraper --> B
@@ -39,7 +40,8 @@ graph TD
     E -- Cluster Assignment --> F
     F -- Source Scoring & Recalculation --> G
     H -- SQL Queries & Semantic Search --> G
-    I -- REST / WebSocket Streams --> H
+    I -- REST / WebSockets --> H
+    J -- Browser --> I
     
     %% Subgraphs for visual grouping
     subgraph Ingestion Layer
@@ -199,6 +201,7 @@ Frontend clients and API consumers receive deeply enriched intelligence payloads
 
 | Layer | Technology | Purpose |
 |-------|------------|---------|
+| **Frontend UI** | `React`, `Vite`, `TypeScript` | Responsive, event-centric intelligence dashboard. |
 | **Core Framework** | `FastAPI`, `Pydantic` | High-throughput async REST endpoints. |
 | **Relational Data** | `PostgreSQL`, `SQLAlchemy` | Acid-compliant operational storage and JSONB. |
 | **Pipeline NLP** | `spaCy`, `Transformers` | Zero-shot classification, summarization, extraction. |
@@ -226,10 +229,10 @@ Deploying the local development stack requires no manual dependency management, 
    cp .env.example .env
    ```
 
-2. **Boot the Platform**  
+2. **Boot the Backend Platform**  
    Compile the python environments and stand up the external volumes in detached mode.
    ```bash
-   docker-compose up --build -d
+   docker compose up --build -d
    ```
 
    The hypervisor will instantiate:
@@ -246,10 +249,17 @@ Deploying the local development stack requires no manual dependency management, 
    # Expected {"status": "operational", "service": "truthlens"}
    ```
 
-4. **Access the Documentation**  
-   Interactive API explorers are automatically mapped:
+4. **Boot the Frontend UI**  
+   Open a new terminal window, navigate to the UI directory, install dependencies, and start the Vite dev server.
+   ```bash
+   cd truthlens-ui
+   npm install
+   npm run dev
+   ```
+
+5. **Access the Applications**  
+   * Intelligence Dashboard: [http://localhost:5173](http://localhost:5173)
    * OpenAPI Swagger: [http://localhost:8000/docs](http://localhost:8000/docs)
-   * Redoc Standard: [http://localhost:8000/redoc](http://localhost:8000/redoc)
 
 ---
 

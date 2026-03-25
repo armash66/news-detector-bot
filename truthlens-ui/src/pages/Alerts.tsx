@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Settings, SlidersHorizontal, Activity } from 'lucide-react';
-import { api, AlertResponse } from '../api';
+import { Settings, SlidersHorizontal } from 'lucide-react';
+import { api, type AlertResponse } from '../api';
 import { formatDistanceToNow } from 'date-fns';
 
 export const Alerts: React.FC = () => {

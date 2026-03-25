@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { api, EventResponse } from '../api';
+import { api, type EventResponse } from '../api';
 import { formatDistanceToNow } from 'date-fns';
 import { Link } from 'react-router-dom';
 
@@ -64,7 +64,7 @@ export const Home: React.FC = () => {
                 <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>No live events detected currently. Check backend ingestion.</div>
             )}
 
-            {!loading && events.map((ev, index) => {
+            {!loading && events.map((ev) => {
                 const isCritical = ev.significance_score > 0.8 || ev.status === 'BREAKING';
                 const borderColor = isCritical ? 'var(--status-critical)' : 'var(--primary)';
                 const badgeClass = isCritical ? 'badge-breaking' : 'badge-trending';

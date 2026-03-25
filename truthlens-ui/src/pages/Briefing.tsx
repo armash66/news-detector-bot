@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { api, EventDetail } from '../api';
+import { api, type EventDetail } from '../api';
 import { formatDistanceToNow } from 'date-fns';
 
 export const Briefing: React.FC = () => {
