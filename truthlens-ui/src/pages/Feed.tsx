@@ -12,7 +12,7 @@ const CATEGORIES = [
   { label: 'Finance', value: 'FINANCE' },
 ];
 
-export const Home: React.FC = () => {
+export const Feed: React.FC = () => {
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
